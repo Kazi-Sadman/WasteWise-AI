@@ -1,0 +1,52 @@
+{
+  "dataset_dir": "/content/wastewise_dataset",
+  "class_names": [
+    "Paper",
+    "Plastic Bottle",
+    "Plastic bag",
+    "Plastic waste"
+  ],
+  "class_names_source": "dataset file: bangladesh_recyclable_waste_dataset/data_canonical_75-15-10/data.yaml",
+  "class_names_verified": true,
+  "used_fallback_split": false,
+  "per_split": {
+    "test": {
+      "images": 711,
+      "label_files": 711,
+      "malformed_line": 1370,
+      "objects": 4
+    },
+    "train": {
+      "images": 4121,
+      "label_files": 4121,
+      "malformed_line": 8680,
+      "objects": 2
+    },
+    "val": {
+      "images": 852,
+      "label_files": 852,
+      "malformed_line": 2092,
+      "objects": 4
+    }
+  },
+  "objects_per_class": {
+    "test": {
+      "Plastic bag": 2,
+      "Plastic waste": 2
+    },
+    "train": {
+      "Plastic waste": 2
+    },
+    "val": {
+      "Plastic waste": 4
+    }
+  },
+  "problem_counts": {
+    "malformed_line": 12142,
+    "label_without_image": 10
+  },
+  "labels_without_image": 10,
+  "duplicate_image_groups": 2842,
+  "cross_split_duplicate_groups": 143,
+  "repeated_file_names": 2842
+}
