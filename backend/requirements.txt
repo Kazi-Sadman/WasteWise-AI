@@ -1,0 +1,14 @@
+# Web API
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9      # needed for file uploads
+pydantic-settings>=2.2
+
+# Model + image handling (ultralytics installs PyTorch for you)
+ultralytics>=8.3
+pillow>=10.0
+numpy>=1.26
+
+# Tests
+pytest>=8.0
+httpx>=0.27                  # used by FastAPI's TestClient
