@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets / local config
+.env
+backend/.env
+
+# Large files: model weights and datasets are NOT committed.
+# (Use Git LFS or a release asset if you want to share best.pt.)
+*.pt
+*.onnx
+datasets/
+dataset*/
+*.zip
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
