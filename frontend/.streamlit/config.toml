@@ -1,0 +1,12 @@
+[theme]
+base = "dark"
+primaryColor = "#34d399"
+
+[server]
+maxUploadSize = 10
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
