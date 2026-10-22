@@ -19,7 +19,10 @@ import components as ui
 from content import info, load_report, per_class_rows
 from theme import build_css
 
-DEFAULT_API_URL = os.getenv("WASTEWISE_API_URL", "http://127.0.0.1:8000")
+DEFAULT_API_URL = os.getenv(
+    "WASTEWISE_API_URL",
+    "https://wastewise-ai-backend-sq58.onrender.com"
+)
 PAGES = ["Home", "Detect", "History", "Model"]
 MAX_HISTORY = 12
 

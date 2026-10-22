@@ -12,7 +12,7 @@ backend/.env
 
 # Large files: model weights and datasets are NOT committed.
 # (Use Git LFS or a release asset if you want to share best.pt.)
-*.pt
+# *.pt
 *.onnx
 datasets/
 dataset*/
