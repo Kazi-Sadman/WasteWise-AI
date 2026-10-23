@@ -68,12 +68,30 @@ class Detector:
     def detect(self, image: Image.Image, confidence: float, iou: float, draw: bool = False) -> DetectionResult:
         width, height = image.size
         started = time.perf_counter()
+
+        logger.info(
+            "Starting YOLO inference | image_size=%s | imgsz=%s | device=%s",
+            image.size,
+            self.settings.image_size,
+            self.settings.device,
+        )
+
         with self._lock:
             result = self.model.predict(
-                image, conf=confidence, iou=iou, imgsz=self.settings.image_size,
-                device=self.settings.device, verbose=False,
+                image,
+                conf=confidence,
+                iou=iou,
+                imgsz=self.settings.image_size,
+                device=self.settings.device,
+                verbose=False,
             )[0]
+
         elapsed_ms = (time.perf_counter() - started) * 1000
+
+        logger.info(
+            "YOLO inference completed in %.2f seconds",
+            elapsed_ms / 1000,
+        )
 
         detections = []
         class_ids = []

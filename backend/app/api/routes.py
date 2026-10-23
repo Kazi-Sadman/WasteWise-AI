@@ -1,4 +1,8 @@
 """HTTP endpoints."""
+import logging
+import time
+
+
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
@@ -10,6 +14,7 @@ from app.services.detector import jpeg_to_base64
 from app.services.preprocessing import ImageValidationError, load_image
 
 router = APIRouter(prefix="/api/v1")
+logger = logging.getLogger("wastewise")
 
 
 def get_detector(request: Request):
@@ -46,27 +51,76 @@ async def detect(
     detector=Depends(get_detector),
     settings: Settings = Depends(get_settings),
 ):
-    # Read at most limit+1 bytes so a huge upload cannot fill memory.
+    # Track the total request processing time.
+    request_started = time.perf_counter()
+
+    logger.info(
+        "Detection request received | filename=%s | content_type=%s",
+        file.filename,
+        file.content_type,
+    )
+
+    # Read at most limit+1 bytes to limit memory usage.
     data = await file.read(settings.max_upload_bytes + 1)
+
+    logger.info("Upload read completed | size_bytes=%s", len(data))
+
     try:
-        image = load_image(data, file.content_type, settings.max_upload_bytes, settings.max_image_pixels)
+        image = load_image(
+            data,
+            file.content_type,
+            settings.max_upload_bytes,
+            settings.max_image_pixels,
+        )
+
+        logger.info(
+            "Image preprocessing completed | dimensions=%s",
+            image.size,
+        )
+
     except ImageValidationError as err:
-        raise HTTPException(status_code=err.status_code, detail=err.message)
+        logger.warning("Image validation failed: %s", err.message)
+        raise HTTPException(
+            status_code=err.status_code,
+            detail=err.message,
+        )
 
     conf = settings.confidence_threshold if confidence is None else confidence
     iou_value = settings.iou_threshold if iou is None else iou
     try:
-        result = await run_in_threadpool(detector.detect, image, conf, iou_value, return_image)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Detection failed while running the model.")
+        logger.info("Starting detection inference")
 
+        result = await run_in_threadpool(
+            detector.detect,
+            image,
+            conf,
+            iou_value,
+            return_image,
+        )
+
+        logger.info(
+            "Detection completed | inference_ms=%.1f | detections=%s",
+            result.inference_ms,
+            len(result.detections),
+        )
+
+    except Exception:
+        logger.exception("Detection failed while running the model")
+        raise HTTPException(
+            status_code=500,
+            detail="Detection failed while running the model.",
+        )
+        logger.info(
+        "Detection request completed | total_seconds=%.2f",
+        time.perf_counter() - request_started,)
+        
     return DetectionResponse(
-        model_name=detector.model_name,
-        image_width=result.width,
-        image_height=result.height,
-        confidence_threshold=conf,
-        detections=result.detections,
-        counts_by_class=result.counts_by_class,
-        inference_ms=result.inference_ms,
-        annotated_image_base64=jpeg_to_base64(result.annotated_jpeg) if result.annotated_jpeg else None,
-    )
+            model_name=detector.model_name,
+            image_width=result.width,
+            image_height=result.height,
+            confidence_threshold=conf,
+            detections=result.detections,
+            counts_by_class=result.counts_by_class,
+            inference_ms=result.inference_ms,
+            annotated_image_base64=jpeg_to_base64(result.annotated_jpeg) if result.annotated_jpeg else None,
+        )
