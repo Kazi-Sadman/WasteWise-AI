@@ -284,11 +284,18 @@ Check the current Ultralytics licensing terms before commercial use. Dataset lic
 - Dataset coverage may not represent all waste types or environments in Bangladesh.
 - Detecting an object does not establish whether it can be recycled locally.
 
+## 👥 Team
+
 ## 🌱 Expected Impact
 
 WasteWise AI aims to make waste identification more accessible, encourage recycling awareness, and demonstrate a practical computer vision application relevant to waste management in Bangladesh.
 
 ---
+
+This project was developed by:
+
+- **Kazi Sadman Zahin**
+- **Abdur Rahman Tanvir**
 
 **Try the live application:** [WasteWise AI — Streamlit Demo](https://wastewise-ai-hg7q42ygduko6ohgzrgwj2.streamlit.app/)
 
