@@ -1,142 +1,283 @@
-# WasteWise AI
+# ♻️ WasteWise AI
 
-Detects waste in a photo — **Paper, Plastic Bottle, Plastic bag, Plastic waste** — and returns a box, class name and confidence for every object, plus counts per class.
+**AI-Powered Recyclable Waste Object Detection System**
 
-- **Training:** one Google Colab notebook (Ultralytics YOLO11n, transfer learning).
-- **Serving:** a FastAPI backend that loads the trained model once and exposes `POST /api/v1/detect`.
-- **Frontend:** Streamlit, planned for later.
+WasteWise AI detects multiple waste objects in an image and returns a bounding box, predicted class, and confidence score for each detection, along with counts per class.
 
-> WasteWise AI is advisory. It does not sort waste, and a prediction does not prove an item is recyclable where you live.
+🌐 **Live Demo:** [Try WasteWise AI on Streamlit](https://wastewise-ai-hg7q42ygduko6ohgzrgwj2.streamlit.app/)
 
-## ⚠️ Read first: re-run training before quoting metrics
+## 🎯 Project Purpose
 
-The first Colab run mixed two overlapping dataset partitions and its audit could not read polygon labels. The model file works for the backend, but the numbers in `reports/` from that run are optimistic and the error-analysis section is invalid. Apply [`docs/notebook_fixes.md`](docs/notebook_fixes.md), retrain, and replace the reports and `best.pt`.
+The purpose of WasteWise AI is to use computer vision to identify common waste items and support recycling awareness in Bangladesh. It provides visual predictions to help users understand what types of waste appear in an image.
 
-## Project layout
+> **Note:** WasteWise AI is an advisory tool. It does not physically sort waste, and a prediction does not guarantee that an item is recyclable under local recycling guidelines.
 
-```
+## ✨ Features
+
+- **Multiple Object Detection:** Detect several waste objects in a single image.
+- **Four Supported Classes:** Paper, Plastic Bottle, Plastic Bag, and Plastic Waste.
+- **Bounding Boxes:** Display the locations of detected objects.
+- **Confidence Scores:** Show the model's confidence for each prediction.
+- **Class Counts:** Summarize the number of detected objects per class.
+- **REST API:** Provide predictions through a FastAPI backend.
+- **Interactive Demo:** Try the application through the live Streamlit interface.
+
+## 🧠 Technology Stack
+
+- **Programming Language:** Python
+- **Model Training:** PyTorch, Ultralytics YOLO11n, transfer learning
+- **Training Environment:** Google Colab
+- **Backend API:** FastAPI, Uvicorn
+- **Image Processing:** OpenCV, Pillow
+- **Demo Interface:** Streamlit
+
+## ⚠️ Important: Retrain Before Reporting Metrics
+
+The initial Colab training run mixed overlapping dataset partitions, and the audit could not correctly read polygon labels. As a result, the evaluation metrics from that run may be overly optimistic, and its error analysis is unreliable.
+
+Before reporting model performance, apply the fixes described in [`docs/notebook_fixes.md`](docs/notebook_fixes.md), retrain the model, and replace the outdated model weights and evaluation reports.
+
+Do not treat metrics from the initial run as validated results.
+
+## 📁 Project Structure
+
+```text
 WasteWise-AI/
-├── notebooks/WasteWise_AI_Colab_Training.ipynb   ← your trained notebook (put it here)
+├── notebooks/
+│   └── WasteWise_AI_Colab_Training.ipynb
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                 app + model loaded once at startup
-│   │   ├── config.py               settings from .env
-│   │   ├── api/routes.py           /health and /detect
-│   │   ├── schemas/detection.py    response models
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── api/
+│   │   │   └── routes.py
+│   │   ├── schemas/
+│   │   │   └── detection.py
 │   │   └── services/
-│   │       ├── detector.py         YOLO wrapper
-│   │       ├── preprocessing.py    upload checks + decoding
-│   │       └── waste_mapping.py    class names + counts
-│   ├── models/                     ← put best.pt and model_metadata.json here
-│   ├── tests/test_detection.py
+│   │       ├── detector.py
+│   │       ├── preprocessing.py
+│   │       └── waste_mapping.py
+│   ├── models/
+│   │   ├── best.pt
+│   │   └── model_metadata.json
+│   ├── tests/
+│   │   └── test_detection.py
 │   ├── requirements.txt
 │   └── .env.example
-├── reports/                        ← put dataset_audit.json, evaluation.json, evaluation.md here
-├── docs/{project_design.md, notebook_fixes.md}
+├── reports/
+│   ├── dataset_audit.json
+│   ├── evaluation.json
+│   └── evaluation.md
+├── docs/
+│   ├── project_design.md
+│   └── notebook_fixes.md
 ├── .gitignore
 └── README.md
 ```
 
-Copy your existing files into place (they are not included here): `best.pt` and `model_metadata.json` → `backend/models/`; notebook → `notebooks/`; reports → `reports/`.
+**Note:** The structure above describes the intended project layout. Ensure the listed files exist in your repository before treating it as the exact current structure. Model weights and reports must be generated or copied into their respective folders.
 
-## Run the backend
+## 🚀 Run the Backend Locally
 
-Python 3.10+ is recommended.
+**Requirements:** Python 3.10 or later.
+
+### 1. Clone the repository
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd WasteWise-AI
+```
+
+Replace `YOUR_GITHUB_REPOSITORY_URL` with your actual GitHub repository URL.
+
+### 2. Set up the Python environment
+
+From the project root:
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install -r requirements.txt      # installs PyTorch via ultralytics (large download)
-cp .env.example .env                 # optional: change thresholds, DEVICE, limits
+```
+
+Activate the environment.
+
+**Windows PowerShell:**
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**macOS/Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+PyTorch and Ultralytics may require a substantial download.
+
+### 4. Configure environment variables
+
+Copy the example environment file.
+
+**Windows PowerShell:**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS/Linux:**
+
+```bash
+cp .env.example .env
+```
+
+Adjust the configuration if necessary.
+
+### 5. Start the API
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Open http://127.0.0.1:8000/docs for the interactive Swagger page. Check http://127.0.0.1:8000/api/v1/health — it should say `"model_loaded": true` and list the four classes. If `best.pt` is missing the server still starts, `/health` explains why and `/detect` returns 503.
+Open the following URLs in your browser:
 
-### Try it
+- **Swagger API documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Health check:** [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health)
+
+The health endpoint should report whether the model loaded successfully. Ensure `best.pt` exists at the configured model path.
+
+## 🧪 Test the Detection API
+
+Send an image to the detection endpoint:
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/detect?confidence=0.25" \
-     -F "file=@my_photo.jpg"
+curl -X POST \
+  "http://127.0.0.1:8000/api/v1/detect?confidence=0.25" \
+  -F "file=@my_photo.jpg"
 ```
 
-Add `&return_image=true` to also get the annotated picture as base64 JPEG in `annotated_image_base64`.
+Replace `my_photo.jpg` with the path to an image on your computer.
+
+To request an annotated image, if supported by your backend:
+
+```text
+/api/v1/detect?confidence=0.25&return_image=true
+```
+
+### Example Response
+
+The following is an illustrative example, not a real model prediction.
 
 ```json
 {
-  "model_name": "WasteWise YOLO detector (yolo11n.pt)",
+  "model_name": "WasteWise YOLO detector",
   "image_width": 1280,
   "image_height": 720,
   "confidence_threshold": 0.25,
   "detections": [
-    {"class_id": 1, "class_name": "Plastic Bottle", "confidence": 0.93,
-     "bbox": {"x_min": 40, "y_min": 35, "x_max": 180, "y_max": 260}}
+    {
+      "class_id": 1,
+      "class_name": "Plastic Bottle",
+      "confidence": 0.93,
+      "bbox": {
+        "x_min": 40,
+        "y_min": 35,
+        "x_max": 180,
+        "y_max": 260
+      }
+    }
   ],
-  "counts_by_class": {"Paper": 0, "Plastic Bottle": 1, "Plastic bag": 0, "Plastic waste": 0},
+  "counts_by_class": {
+    "Paper": 0,
+    "Plastic Bottle": 1,
+    "Plastic Bag": 0,
+    "Plastic Waste": 0
+  },
   "inference_ms": 85.2,
   "annotated_image_base64": null
 }
 ```
 
-(Illustrative example, not a real prediction.) Boxes are pixels in the original image, origin top-left.
+Bounding-box coordinates are pixel values relative to the original image, with the origin at the top-left corner.
 
-| Status | Meaning |
-|---|---|
-| 200 | OK (an empty `detections` list means nothing was found — not an error) |
-| 400 | Empty, corrupt or unreadable image |
-| 413 | File larger than `MAX_UPLOAD_MB` or too many pixels |
-| 415 | Not JPEG/PNG/WEBP/BMP |
-| 422 | Bad parameter (e.g. `confidence=1.5`) |
-| 500 | Model failed while running |
-| 503 | Model not loaded |
+### HTTP Status Codes
 
-## Configuration (`backend/.env`)
+| Status | Meaning                             |
+| ------ | ----------------------------------- |
+| `200`  | Request processed successfully      |
+| `400`  | Empty, corrupt, or unreadable image |
+| `413`  | Upload exceeds the configured limit |
+| `415`  | Unsupported image format            |
+| `422`  | Invalid request parameter           |
+| `500`  | Internal model or inference error   |
+| `503`  | Model is not loaded                 |
 
-| Variable | Default | Meaning |
-|---|---|---|
-| `MODEL_PATH` | `models/best.pt` | Relative to `backend/` |
-| `METADATA_PATH` | `models/model_metadata.json` | Class names, checksum |
-| `CONFIDENCE_THRESHOLD` | `0.25` | Default minimum confidence |
-| `IOU_THRESHOLD` | `0.7` | Default NMS overlap |
-| `IMAGE_SIZE` | `640` | Must match training size |
-| `MAX_UPLOAD_MB` | `10` | Upload limit |
-| `DEVICE` | `cpu` | `cpu` or a GPU index like `0` |
+These status codes describe the intended API behavior; verify them against the implemented backend.
 
-## Tests
+## ⚙️ Configuration
+
+The following variables are examples of the intended `backend/.env` configuration. Actual defaults depend on your implementation.
+
+| Variable               | Example                      | Purpose                           |
+| ---------------------- | ---------------------------- | --------------------------------- |
+| `MODEL_PATH`           | `models/best.pt`             | Trained model location            |
+| `METADATA_PATH`        | `models/model_metadata.json` | Model metadata location           |
+| `CONFIDENCE_THRESHOLD` | `0.25`                       | Minimum detection confidence      |
+| `IOU_THRESHOLD`        | `0.7`                        | Non-maximum suppression threshold |
+| `IMAGE_SIZE`           | `640`                        | Model inference image size        |
+| `MAX_UPLOAD_MB`        | `10`                         | Maximum upload size               |
+| `DEVICE`               | `cpu`                        | Inference device                  |
+
+## 🧪 Run Tests
+
+From the `backend/` directory:
 
 ```bash
-cd backend
 pytest
 ```
 
-The tests use a fake detector, so they need no model or GPU: valid image, no detections, wrong type, corrupt/truncated/empty file, oversized file, bad parameters, model failure and model-not-loaded.
+If the tests use a mock detector, they can validate API behavior without requiring a trained model or GPU. Follow the project test configuration for the exact coverage.
 
-Real-model smoke test (needs `best.pt` in `backend/models/`):
+## 🏗️ How It Works
 
-```bash
-cd backend
-python - <<'PY'
-from ultralytics import YOLO
-m = YOLO("models/best.pt")
-r = m.predict("some_photo.jpg", conf=0.25, device="cpu", verbose=False)[0]
-print(m.names, len(r.boxes), "detections")
-PY
-```
+1. **Dataset Preparation:** Inspect and validate the waste detection dataset and annotations.
+2. **Model Training:** Fine-tune a YOLO11n model in Google Colab.
+3. **Evaluation:** Evaluate the trained model and review its errors.
+4. **Model Export:** Save the trained weights as `best.pt`.
+5. **Backend Inference:** Load the model through FastAPI and process image uploads.
+6. **Result Presentation:** Return predicted classes, confidence scores, bounding boxes, and class counts to the client.
 
-Verify the model file: `sha256sum models/best.pt` should equal the `sha256` in `model_metadata.json` (the server also warns at startup if it doesn't).
+## 📊 Dataset and Licenses
 
-## Design notes
+**Dataset:** _A Curated Recyclable Waste Object Detection Dataset from Public Spaces in Southeastern Bangladesh_
 
-- The model is loaded **once** at startup, not per request; one prediction runs at a time.
-- Uploads are validated (size, type, decode) and are **never written to disk**.
-- Class names come from the model/metadata, not hard-coded, so retraining with a different class order cannot silently mislabel results.
-- No CORS is enabled: a Streamlit app calls the API from its own server. Add CORS only if a browser page will call it directly.
+- **Source:** [Zenodo Dataset](https://zenodo.org/records/22043339)
+- **DOI:** [10.5281/zenodo.22043339](https://doi.org/10.5281/zenodo.22043339)
+- **Dataset License:** CC BY 4.0, as identified for the dataset in the project documentation. Credit the dataset authors when using or redistributing the data.
 
-## Dataset and licenses
+Check the current Ultralytics licensing terms before commercial use. Dataset licensing and model-library licensing are separate considerations.
 
-Data: *A Curated Recyclable Waste Object Detection Dataset from Public Spaces in Southeastern Bangladesh*, Mazumder, S. H., Zenodo, DOI 10.5281/zenodo.22043339, **CC BY 4.0** — credit the authors. Check Ultralytics' current license terms before commercial use. Neither is legal advice from this project.
+## ⚠️ Limitations
 
-## Limitations
+- The model supports only four trained waste classes.
+- Small, dirty, occluded, or overlapping objects may be missed.
+- Predictions depend on image quality and the model's training.
+- Confidence scores do not guarantee correctness.
+- Dataset coverage may not represent all waste types or environments in Bangladesh.
+- Detecting an object does not establish whether it can be recycled locally.
 
-Only four classes; small, occluded, dirty or overlapping objects may be missed; "Plastic waste" was the weakest class in the first run; images come from one region; confidence is not a guarantee.
+## 🌱 Expected Impact
+
+WasteWise AI aims to make waste identification more accessible, encourage recycling awareness, and demonstrate a practical computer vision application relevant to waste management in Bangladesh.
+
+---
+
+**Try the live application:** [WasteWise AI — Streamlit Demo](https://wastewise-ai-hg7q42ygduko6ohgzrgwj2.streamlit.app/)
+
+**Project status:** Model development, evaluation, and application integration should be considered ongoing until the corrected training run and reports have been validated.
