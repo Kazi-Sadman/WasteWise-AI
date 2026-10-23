@@ -12,6 +12,18 @@ The purpose of WasteWise AI is to use computer vision to identify common waste i
 
 > **Note:** WasteWise AI is an advisory tool. It does not physically sort waste, and a prediction does not guarantee that an item is recyclable under local recycling guidelines.
 
+## 🖼️ App Screenshots
+
+### Home Interface
+
+![Home Interface](assets/screenshot-home.png)
+
+### Detection Results
+
+![Detection Results](assets/screenshot-detection.png)
+
+> _Note: Make sure to save your two screenshot image files inside an `assets/` folder in your repository so they display correctly._
+
 ## ✨ Features
 
 - **Multiple Object Detection:** Detect several waste objects in a single image.
